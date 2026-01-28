@@ -1,4 +1,5 @@
 import { Request, Response } from "express";
+import { ProductType } from "../types/product";
 import * as productService from "../services/productService";
 
 export const getAllProducts = async (req: Request, res: Response) => {
@@ -6,9 +7,12 @@ export const getAllProducts = async (req: Request, res: Response) => {
   res.status(200).json(products);
 };
 
-export const addProduct = async (req: Request, res: Response) => {
+export const addProduct = async (
+  req: Request<{}, {}, ProductType>,
+  res: Response
+) => {
   try {
-    const products = await productService.addProduct(req.body.name);
+    const products = await productService.addProduct(req.body);
     res.status(200).json(products);
   } catch (err: any) {
     res.status(400).json({ error: err.message });

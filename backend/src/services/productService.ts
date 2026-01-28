@@ -1,10 +1,13 @@
 import { Product } from "../models/Product";
+import { ProductType } from "../types/product";
 
 export const getAllProducts = async () => {
   return await Product.find();
 };
 
-export const addProduct = async (name: string) => {
+export const addProduct = async (product: ProductType) => {
+  const { name } = product;
+
   if (!name) {
     throw new Error("invalid product, name is missing");
   }

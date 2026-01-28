@@ -7,7 +7,7 @@ const app = express();
 
 app.use(express.json());
 
-app.use("/products", productRoutes);
+app.use("/product", productRoutes);
 app.use("/inventory", inventoryRoutes);
 
 app.use(cors());
