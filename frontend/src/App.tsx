@@ -1,34 +1,111 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
+import {
+  BrowserRouter,
+  Routes,
+  Route,
+  Navigate,
+  useNavigate,
+  useLocation,
+} from "react-router-dom";
+import InventoryPage from "./pages/InventoryPage";
+import ProductsPage from "./pages/ProductsPage";
+import Header from "./components/ui/Header";
+import Loader from "./components/ui/Loader";
+import StatusMessage from "./components/ui/StatusMessage";
+import { useProducts } from "./hooks/useProducts";
+import { useInventory } from "./hooks/useInventory";
 
-function App() {
-  const [count, setCount] = useState(0)
+function AppContent() {
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  const {
+    products,
+    isLoading: productsLoading,
+    statusMessage: productsStatus,
+    addProduct,
+    renameProduct,
+    deleteProduct,
+  } = useProducts();
+
+  const {
+    inventory,
+    isLoading: inventoryLoading,
+    savingItem,
+    isResetting,
+    statusMessage: inventoryStatus,
+    addInventoryItem,
+    increment,
+    decrement,
+    resetInventory,
+  } = useInventory(products);
+
+  const isLoading = productsLoading || inventoryLoading;
+  const statusMessage = productsStatus || inventoryStatus;
+
+  const currentRoute =
+    location.pathname === "/product" ? "product" : "inventory";
 
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
+    <div className="min-h-screen bg-slate-100 text-slate-900">
+      <div className="mx-auto flex min-h-screen max-w-6xl flex-col gap-8 px-6 py-10">
+        <Header
+          route={currentRoute}
+          onNavigate={(route) =>
+            navigate(route === "product" ? "/product" : "/inventory")
+          }
+        />
+
+        {statusMessage && <StatusMessage message={statusMessage} />}
+
+        {isLoading ? (
+          <Loader />
+        ) : (
+          <Routes>
+            <Route path="/" element={<Navigate to="/inventory" replace />} />
+
+            <Route
+              path="/inventory"
+              element={
+                <InventoryPage
+                  products={products}
+                  inventory={inventory}
+                  onAddItem={addInventoryItem}
+                  onIncrement={increment}
+                  onDecrement={decrement}
+                  onReset={resetInventory}
+                  savingItem={savingItem}
+                  isResetting={isResetting}
+                />
+              }
+            />
+
+            <Route
+              path="/product"
+              element={
+                <ProductsPage
+                  products={products}
+                  onAddProduct={addProduct}
+                  onRenameProduct={renameProduct}
+                  onDeleteProduct={deleteProduct}
+                  onNavigateInventory={() => navigate("/inventory")}
+                />
+              }
+            />
+
+            <Route path="*" element={<Navigate to="/inventory" replace />} />
+          </Routes>
+        )}
       </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
+    </div>
+  );
 }
 
-export default App
+function App() {
+  return (
+    <BrowserRouter>
+      <AppContent />
+    </BrowserRouter>
+  );
+}
+
+export default App;
