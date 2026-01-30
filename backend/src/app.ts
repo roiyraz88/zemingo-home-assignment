@@ -8,12 +8,11 @@ import { swaggerSpec } from "./docs/swagger";
 const app = express();
 
 app.use(express.json());
+app.use(cors());
 
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
-app.use("/product", productRoutes);
-app.use("/inventory", inventoryRoutes);
-
-app.use(cors());
+app.use("/api/product", productRoutes);
+app.use("/api/inventory", inventoryRoutes);
 
 export default app;
