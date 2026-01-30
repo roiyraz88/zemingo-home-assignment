@@ -1,54 +1,103 @@
-import { useState } from "react";
-import type { InventoryItem } from "../types/inventory";
+import { useEffect, useState } from "react";
+import type { Product } from "../types/product";
+import Spinner from "./ui/Spinner";
 
 interface Props {
-  onSubmit: (items: InventoryItem[]) => void;
+  products: Product[];
+  onAdd: (
+    productName: string,
+    quantity: number
+  ) => Promise<{ ok: boolean; message?: string }>;
 }
 
-export default function InventoryForm({ onSubmit }: Props) {
-  const [name, setName] = useState("");
-  const [quantity, setQuantity] = useState<number>(0);
+const InventoryForm = ({ products, onAdd }: Props) => {
+  const [selectedProduct, setSelectedProduct] = useState("");
+  const [quantity, setQuantity] = useState<string>("1");
+  const [message, setMessage] = useState<string | null>(null);
+  const [isAdding, setIsAdding] = useState(false); // 👈 חדש
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
+  useEffect(() => {
+    if (!products.length) {
+      setSelectedProduct("");
+      return;
+    }
+    if (!selectedProduct) {
+      setSelectedProduct(products[0].name);
+    }
+  }, [products, selectedProduct]);
 
-    if (!name || quantity < 0) return;
+  const handleAdd = async () => {
+    if (isAdding) return; // הגנה מלחיצה כפולה
 
-    onSubmit([{ name, quantity }]);
+    setIsAdding(true);
 
-    setName("");
-    setQuantity(0);
+    const parsedQuantity = Number(quantity);
+    const result = await onAdd(selectedProduct, parsedQuantity);
+
+    if (!result.ok) {
+      setMessage(result.message ?? "Unable to add item.");
+      setIsAdding(false);
+      return;
+    }
+
+    setMessage(null);
+    setQuantity("1");
+    setIsAdding(false);
   };
 
   return (
-    <form
-      onSubmit={handleSubmit}
-      className="p-4 border rounded space-y-4 bg-white shadow"
-    >
-      <h2 className="text-lg font-bold">Set Inventory</h2>
+    <div className="flex flex-col gap-4">
+      <div className="grid gap-3 md:grid-cols-[minmax(0,1fr)_140px_auto] md:items-end">
+        <label className="flex flex-col gap-2 text-sm font-semibold text-slate-600">
+          Product name
+          <select
+            className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-base text-slate-800 focus:border-indigo-400 focus:outline-none"
+            value={selectedProduct}
+            onChange={(e) => setSelectedProduct(e.target.value)}
+            disabled={!products.length || isAdding}
+          >
+            {products.length === 0 ? (
+              <option value="">No products yet</option>
+            ) : (
+              products.map((product) => (
+                <option key={product.name} value={product.name}>
+                  {product.name}
+                </option>
+              ))
+            )}
+          </select>
+        </label>
 
-      <input
-        type="text"
-        placeholder="Product name"
-        className="border p-2 w-full"
-        value={name}
-        onChange={(e) => setName(e.target.value)}
-      />
+        <label className="flex flex-col gap-2 text-sm font-semibold text-slate-600">
+          Quantity
+          <input
+            className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-base text-slate-800 focus:border-indigo-400 focus:outline-none"
+            type="number"
+            min={1}
+            step={1}
+            value={quantity}
+            onChange={(e) => setQuantity(e.target.value)}
+            disabled={isAdding}
+          />
+        </label>
 
-      <input
-        type="number"
-        placeholder="Quantity"
-        className="border p-2 w-full"
-        value={quantity}
-        onChange={(e) => setQuantity(Number(e.target.value))}
-      />
+        <button
+          className="flex h-12 w-12 items-center justify-center rounded-2xl bg-indigo-600 text-2xl font-semibold text-white shadow-lg shadow-indigo-200 disabled:opacity-50"
+          type="button"
+          onClick={handleAdd}
+          disabled={!products.length || isAdding}
+        >
+          {isAdding ? <Spinner size={20} /> : "+"}
+        </button>
+      </div>
 
-      <button
-        type="submit"
-        className="bg-blue-600 text-white px-4 py-2 rounded"
-      >
-        Submit
-      </button>
-    </form>
+      {message ? (
+        <div className="rounded-2xl border border-rose-100 bg-rose-50 px-4 py-3 text-sm font-semibold text-rose-600">
+          {message}
+        </div>
+      ) : null}
+    </div>
   );
-}
+};
+
+export default InventoryForm;
