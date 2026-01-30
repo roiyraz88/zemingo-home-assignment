@@ -1,5 +1,10 @@
 import { Router } from "express";
-import { getAllProducts, addProduct } from "../controllers/productController";
+import {
+  getAllProducts,
+  addProduct,
+  updateProduct,
+  deleteProduct,
+} from "../controllers/productController";
 
 const router = Router();
 
@@ -21,19 +26,31 @@ const router = Router();
  *                 properties:
  *                   name:
  *                     type: string
- *             example:
- *               - name: shampoo
- *               - name: milk
- *               - name: eggs
  */
 router.get("/all", getAllProducts);
 
 /**
  * @swagger
  * /product:
- *   put:
+ *   post:
  *     summary: Add a new product
  *     description: Adds a new product to the system
+ */
+router.post("/", addProduct);
+
+/**
+ * @swagger
+ * /product/{oldName}:
+ *   put:
+ *     summary: Update a product name
+ *     description: Updates an existing product name
+ *     parameters:
+ *       - in: path
+ *         name: oldName
+ *         required: true
+ *         schema:
+ *           type: string
+ *         example: milk
  *     requestBody:
  *       required: true
  *       content:
@@ -46,36 +63,34 @@ router.get("/all", getAllProducts);
  *               name:
  *                 type: string
  *           example:
- *             name: new product
+ *             name: almond milk
  *     responses:
  *       200:
  *         description: Updated list of products
- *         content:
- *           application/json:
- *             schema:
- *               type: array
- *               items:
- *                 type: object
- *                 properties:
- *                   name:
- *                     type: string
  *       400:
  *         description: Bad request
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 error:
- *                   type: string
- *             examples:
- *               duplicate:
- *                 value:
- *                   error: product name already exists
- *               invalid:
- *                 value:
- *                   error: invalid product, name is missing
  */
-router.put("/", addProduct);
+router.put("/:oldName", updateProduct);
+
+/**
+ * @swagger
+ * /product/{name}:
+ *   delete:
+ *     summary: Delete a product
+ *     description: Deletes a product from the system by name
+ *     parameters:
+ *       - in: path
+ *         name: name
+ *         required: true
+ *         schema:
+ *           type: string
+ *         example: milk
+ *     responses:
+ *       200:
+ *         description: Updated list of products
+ *       404:
+ *         description: Product not found
+ */
+router.delete("/:name", deleteProduct);
 
 export default router;

@@ -18,3 +18,34 @@ export const addProduct = async (
     res.status(400).json({ error: err.message });
   }
 };
+
+export const updateProduct = async (
+  req: Request<{ oldName: string }, {}, { name: string }>,
+  res: Response
+) => {
+  try {
+    const { oldName } = req.params;
+    const { name: newName } = req.body;
+
+    const products = await productService.updateProduct(oldName, newName);
+    res.status(200).json(products);
+  } catch (err: any) {
+    res.status(400).json({ error: err.message });
+  }
+};
+
+export const deleteProduct = async (
+  req: Request<{ name: string }>,
+  res: Response
+) => {
+  try {
+    const { name } = req.params;
+
+    const products = await productService.deleteProduct(name);
+    res.status(200).json(products);
+  } catch (err: any) {
+    res.status(400).json({ error: err.message });
+  }
+};
+
+
