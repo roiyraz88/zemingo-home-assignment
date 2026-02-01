@@ -16,10 +16,10 @@ afterAll(async () => {
 });
 
 describe("Product API", () => {
-  describe("POST /api/product (add product)", () => {
+  describe("PUT /product (create product)", () => {
     it("should add a product successfully", async () => {
       const res = await request(app)
-        .post("/api/product")
+        .put("/product")
         .send({ name: "milk" });
 
       expect(res.status).toBe(200);
@@ -27,28 +27,28 @@ describe("Product API", () => {
     });
 
     it("should fail when product name is missing", async () => {
-      const res = await request(app).post("/api/product").send({});
+      const res = await request(app).put("/product").send({});
 
       expect(res.status).toBe(400);
       expect(res.body.error).toMatch(/name/i);
     });
 
     it("should fail on duplicate product", async () => {
-      await request(app).post("/api/product").send({ name: "milk" });
+      await request(app).put("/product").send({ name: "milk" });
 
-      const res = await request(app).post("/api/product").send({ name: "milk" });
+      const res = await request(app).put("/product").send({ name: "milk" });
 
       expect(res.status).toBe(400);
       expect(res.body.error).toMatch(/exists/i);
     });
   });
 
-  describe("GET /api/product/all", () => {
+  describe("GET /product/all", () => {
     it("should return all products", async () => {
-      await request(app).post("/api/product").send({ name: "milk" });
-      await request(app).post("/api/product").send({ name: "bread" });
+      await request(app).put("/product").send({ name: "milk" });
+      await request(app).put("/product").send({ name: "bread" });
 
-      const res = await request(app).get("/api/product/all");
+      const res = await request(app).get("/product/all");
 
       expect(res.status).toBe(200);
       expect(res.body.length).toBe(2);
@@ -58,13 +58,19 @@ describe("Product API", () => {
     });
   });
 
-  describe("PUT /api/product/:oldName (update product)", () => {
-    it("should update product name", async () => {
-      await request(app).post("/api/product").send({ name: "milk" });
+  describe("PUT /product (update product)", () => {
+    it("should update product name using _id", async () => {
+      const createRes = await request(app)
+        .put("/product")
+        .send({ name: "milk" });
+
+      const createdProduct = createRes.body.find(
+        (p: any) => p.name === "milk"
+      );
 
       const res = await request(app)
-        .put("/api/product/milk")
-        .send({ name: "chocolate" });
+        .put("/product")
+        .send({ _id: createdProduct._id, name: "chocolate" });
 
       expect(res.status).toBe(200);
       expect(res.body.some((p: any) => p.name === "chocolate")).toBe(true);
@@ -72,49 +78,58 @@ describe("Product API", () => {
 
     it("should fail when updating non-existing product", async () => {
       const res = await request(app)
-        .put("/api/product/milk")
-        .send({ name: "apple" });
+        .put("/product")
+        .send({ _id: "64f000000000000000000000", name: "apple" });
 
       expect(res.status).toBe(400);
       expect(res.body.error).toMatch(/not found/i);
     });
 
     it("should fail when updating to an existing name", async () => {
-      await request(app).post("/api/product").send({ name: "milk" });
-      await request(app).post("/api/product").send({ name: "bread" });
+      await request(app).put("/product").send({ name: "milk" });
+      await request(app).put("/product").send({ name: "bread" });
+
+      const all = await request(app).get("/product/all");
+      const milk = all.body.find((p: any) => p.name === "milk");
 
       const res = await request(app)
-        .put("/api/product/milk")
-        .send({ name: "bread" });
+        .put("/product")
+        .send({ _id: milk._id, name: "bread" });
 
       expect(res.status).toBe(400);
       expect(res.body.error).toMatch(/exists/i);
     });
 
     it("should fail when new name is missing", async () => {
-      await request(app).post("/api/product").send({ name: "milk" });
+      const createRes = await request(app)
+        .put("/product")
+        .send({ name: "milk" });
+
+      const createdProduct = createRes.body.find(
+        (p: any) => p.name === "milk"
+      );
 
       const res = await request(app)
-        .put("/api/product/milk")
-        .send({});
+        .put("/product")
+        .send({ _id: createdProduct._id });
 
       expect(res.status).toBe(400);
       expect(res.body.error).toMatch(/name/i);
     });
   });
 
-  describe("DELETE /api/product/:name", () => {
+  describe("DELETE /product/:name", () => {
     it("should delete product", async () => {
-      await request(app).post("/api/product").send({ name: "milk" });
+      await request(app).put("/product").send({ name: "milk" });
 
-      const res = await request(app).delete("/api/product/milk");
+      const res = await request(app).delete("/product/milk");
 
       expect(res.status).toBe(200);
       expect(res.body.some((p: any) => p.name === "milk")).toBe(false);
     });
 
     it("should fail when deleting non-existing product", async () => {
-      const res = await request(app).delete("/api/product/milk");
+      const res = await request(app).delete("/product/milk");
 
       expect(res.status).toBe(400);
       expect(res.body.error).toMatch(/not found/i);

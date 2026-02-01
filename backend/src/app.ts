@@ -12,7 +12,7 @@ app.use(cors());
 
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
-app.use("/api/product", productRoutes);
-app.use("/api/inventory", inventoryRoutes);
+app.use("/product", productRoutes);
+app.use("/inventory", inventoryRoutes);
 
 export default app;
