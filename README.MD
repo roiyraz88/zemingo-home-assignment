@@ -219,6 +219,7 @@ AI assistance was used during development.
 - "Generate Jest + Supertest tests for an Express Product API."
 - "Explain how to dockerize a Node.js backend."
 
-**Tool** Cursor
+**Tool:** Cursor
+
 **Example prompts:**
 - "You are a Senior Frontend Developer. Help me to style the react app using tailwind css library."
