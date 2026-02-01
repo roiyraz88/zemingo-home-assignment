@@ -44,6 +44,14 @@ export const useInventory = (products: Product[]) => {
     };
   }, []);
 
+  useEffect(() => {
+    setInventory((prev) =>
+      prev.filter((item) =>
+        products.some((p) => p.name === item.name)
+      )
+    );
+  }, [products]);
+
   const syncWithServer = async (
     updated: InventoryItem[],
     itemName: string

@@ -1,9 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
 import type { Product } from "../types/product";
 import {
-  addProduct as addProductRequest,
   getProducts,
-  updateProduct as updateProductRequest,
+  saveProduct,
   deleteProduct as deleteProductRequest,
 } from "../services/productService";
 import { normalizeName } from "../utils/normalizeName";
@@ -38,15 +37,6 @@ export const useProducts = () => {
     };
   }, []);
 
-  const refreshProducts = async () => {
-    try {
-      const data = await getProducts();
-      setProducts(data);
-    } catch {
-      setStatusMessage("Unable to refresh products.");
-    }
-  };
-
   const addProduct = async (name: string) => {
     const trimmed = normalizeName(name);
 
@@ -59,24 +49,22 @@ export const useProducts = () => {
     }
 
     try {
-      const updated = await addProductRequest(trimmed);
+      const updated = await saveProduct({ name: trimmed });
       setProducts(updated);
-      setStatusMessage(null);
       return { ok: true };
-    } catch {
-      return { ok: false, message: "Unable to save product." };
+    } catch (err: any) {
+      return { ok: false, message: err.response?.data?.error ?? "Save failed" };
     }
   };
 
-  const renameProduct = async (oldName: string, newName: string) => {
+  const renameProduct = async (product: Product, newName: string) => {
     const trimmed = normalizeName(newName);
 
     if (!trimmed) {
       return { ok: false, message: "Product name is required." };
     }
 
-    // לא באמת שינוי → הצלחה
-    if (oldName.toLowerCase() === trimmed.toLowerCase()) {
+    if (product.name.toLowerCase() === trimmed.toLowerCase()) {
       return { ok: true };
     }
 
@@ -85,12 +73,14 @@ export const useProducts = () => {
     }
 
     try {
-      const updated = await updateProductRequest(oldName, trimmed);
+      const updated = await saveProduct({
+        _id: product._id,
+        name: trimmed,
+      });
       setProducts(updated);
-      setStatusMessage(null);
       return { ok: true };
-    } catch {
-      return { ok: false, message: "Unable to rename product." };
+    } catch (err: any) {
+      return { ok: false, message: err.response?.data?.error ?? "Update failed" };
     }
   };
 
@@ -98,7 +88,6 @@ export const useProducts = () => {
     try {
       const updated = await deleteProductRequest(name);
       setProducts(updated);
-      setStatusMessage(null);
       return { ok: true };
     } catch {
       return { ok: false, message: "Unable to delete product." };

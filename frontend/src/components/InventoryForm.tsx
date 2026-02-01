@@ -14,7 +14,7 @@ const InventoryForm = ({ products, onAdd }: Props) => {
   const [selectedProduct, setSelectedProduct] = useState("");
   const [quantity, setQuantity] = useState<string>("1");
   const [message, setMessage] = useState<string | null>(null);
-  const [isAdding, setIsAdding] = useState(false); // 👈 חדש
+  const [isAdding, setIsAdding] = useState(false); 
 
   useEffect(() => {
     if (!products.length) {
@@ -27,7 +27,7 @@ const InventoryForm = ({ products, onAdd }: Props) => {
   }, [products, selectedProduct]);
 
   const handleAdd = async () => {
-    if (isAdding) return; // הגנה מלחיצה כפולה
+    if (isAdding) return; 
 
     setIsAdding(true);
 

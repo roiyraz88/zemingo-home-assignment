@@ -5,43 +5,43 @@ import Spinner from "./ui/Spinner";
 interface Props {
   products: Product[];
   onRename: (
-    oldName: string,
+    product: Product,
     newName: string
   ) => Promise<{ ok: boolean; message?: string }>;
   onDelete: (name: string) => Promise<{ ok: boolean; message?: string }>;
 }
 
 const ProductList = ({ products, onRename, onDelete }: Props) => {
-  const [editingName, setEditingName] = useState<string | null>(null);
+  const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [draftName, setDraftName] = useState("");
   const [message, setMessage] = useState<string | null>(null);
 
-  const [savingName, setSavingName] = useState<string | null>(null);
+  const [savingId, setSavingId] = useState<string | null>(null);
   const [deletingName, setDeletingName] = useState<string | null>(null);
 
-  const startEdit = (name: string) => {
-    if (savingName || deletingName) return;
-    setEditingName(name);
-    setDraftName(name);
+  const startEdit = (product: Product) => {
+    if (savingId || deletingName) return;
+    setEditingProduct(product);
+    setDraftName(product.name);
     setMessage(null);
   };
 
   const handleSave = async () => {
-    if (!editingName) return;
+    if (!editingProduct) return;
 
-    setSavingName(editingName);
-    const result = await onRename(editingName, draftName);
+    setSavingId(editingProduct._id);
+    const result = await onRename(editingProduct, draftName);
 
     if (!result.ok) {
       setMessage(result.message ?? "Unable to rename product.");
-      setSavingName(null);
+      setSavingId(null);
       return;
     }
 
-    setEditingName(null);
+    setEditingProduct(null);
     setDraftName("");
     setMessage(null);
-    setSavingName(null);
+    setSavingId(null);
   };
 
   const handleDelete = async (name: string) => {
@@ -56,8 +56,8 @@ const ProductList = ({ products, onRename, onDelete }: Props) => {
   };
 
   const handleCancel = () => {
-    if (savingName) return;
-    setEditingName(null);
+    if (savingId) return;
+    setEditingProduct(null);
     setDraftName("");
     setMessage(null);
   };
@@ -78,13 +78,13 @@ const ProductList = ({ products, onRename, onDelete }: Props) => {
       ) : (
         <ul className="mt-6 flex flex-col gap-3">
           {products.map((product) => {
-            const isEditing = editingName === product.name;
-            const isSaving = savingName === product.name;
+            const isEditing = editingProduct?._id === product._id;
+            const isSaving = savingId === product._id;
             const isDeleting = deletingName === product.name;
 
             return (
               <li
-                key={product.name}
+                key={product._id}
                 className="flex flex-col gap-3 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 sm:flex-row sm:items-center sm:justify-between"
               >
                 {isEditing ? (
@@ -131,8 +131,8 @@ const ProductList = ({ products, onRename, onDelete }: Props) => {
                       <button
                         className="rounded-full border border-slate-200 px-4 py-1.5 text-xs font-semibold text-slate-500 disabled:opacity-50"
                         type="button"
-                        onClick={() => startEdit(product.name)}
-                        disabled={Boolean(deletingName || savingName)}
+                        onClick={() => startEdit(product)}
+                        disabled={Boolean(deletingName || savingId)}
                       >
                         Edit
                       </button>
@@ -141,7 +141,7 @@ const ProductList = ({ products, onRename, onDelete }: Props) => {
                         className="flex items-center justify-center rounded-full border border-rose-100 bg-rose-50 px-4 py-1.5 text-xs font-semibold text-rose-500 disabled:opacity-50"
                         type="button"
                         onClick={() => handleDelete(product.name)}
-                        disabled={isDeleting || Boolean(savingName)}
+                        disabled={isDeleting || Boolean(savingId)}
                       >
                         {isDeleting ? <Spinner size={14} /> : "Delete"}
                       </button>
