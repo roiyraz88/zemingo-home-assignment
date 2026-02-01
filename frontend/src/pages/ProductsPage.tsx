@@ -6,7 +6,7 @@ interface Props {
   products: Product[];
   onAddProduct: (name: string) => Promise<{ ok: boolean; message?: string }>;
   onRenameProduct: (
-    oldName: string,
+    product: Product,
     newName: string
   ) => Promise<{ ok: boolean; message?: string }>;
   onDeleteProduct: (name: string) => Promise<{ ok: boolean; message?: string }>;
