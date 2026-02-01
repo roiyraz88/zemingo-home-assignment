@@ -16,12 +16,13 @@ afterAll(async () => {
 });
 
 describe("Inventory API", () => {
-  describe("POST /api/inventory", () => {
+  describe("POST /inventory", () => {
     it("should set inventory successfully", async () => {
-      await request(app).post("/api/product").send({ name: "milk" });
+      // create product first
+      await request(app).put("/product").send({ name: "milk" });
 
       const res = await request(app)
-        .post("/api/inventory")
+        .post("/inventory")
         .send([{ name: "milk", quantity: 2 }]);
 
       expect(res.status).toBe(200);
@@ -32,7 +33,7 @@ describe("Inventory API", () => {
 
     it("should fail when body is not an array", async () => {
       const res = await request(app)
-        .post("/api/inventory")
+        .post("/inventory")
         .send({ name: "milk", quantity: 2 });
 
       expect(res.status).toBe(400);
@@ -41,7 +42,7 @@ describe("Inventory API", () => {
 
     it("should fail when name is missing", async () => {
       const res = await request(app)
-        .post("/api/inventory")
+        .post("/inventory")
         .send([{ quantity: 2 }]);
 
       expect(res.status).toBe(400);
@@ -50,7 +51,7 @@ describe("Inventory API", () => {
 
     it("should fail when quantity is missing", async () => {
       const res = await request(app)
-        .post("/api/inventory")
+        .post("/inventory")
         .send([{ name: "milk" }]);
 
       expect(res.status).toBe(400);
@@ -59,7 +60,7 @@ describe("Inventory API", () => {
 
     it("should fail when product does not exist", async () => {
       const res = await request(app)
-        .post("/api/inventory")
+        .post("/inventory")
         .send([{ name: "bread", quantity: 1 }]);
 
       expect(res.status).toBe(400);
@@ -67,15 +68,15 @@ describe("Inventory API", () => {
     });
   });
 
-  describe("GET /api/inventory", () => {
+  describe("GET /inventory", () => {
     it("should return inventory", async () => {
-      await request(app).post("/api/product").send({ name: "milk" });
+      await request(app).put("/product").send({ name: "milk" });
 
       await request(app)
-        .post("/api/inventory")
+        .post("/inventory")
         .send([{ name: "milk", quantity: 3 }]);
 
-      const res = await request(app).get("/api/inventory");
+      const res = await request(app).get("/inventory");
 
       expect(res.status).toBe(200);
       expect(res.body[0].name).toBe("milk");
@@ -83,9 +84,9 @@ describe("Inventory API", () => {
     });
   });
 
-  describe("POST /api/inventory/reset", () => {
+  describe("POST /inventory/reset", () => {
     it("should reset inventory", async () => {
-      const res = await request(app).post("/api/inventory/reset");
+      const res = await request(app).post("/inventory/reset");
 
       expect(res.status).toBe(200);
       expect(res.body).toEqual([]);

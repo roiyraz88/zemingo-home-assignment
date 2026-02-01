@@ -1,8 +1,7 @@
 import { Router } from "express";
 import {
   getAllProducts,
-  addProduct,
-  updateProduct,
+  upsertProduct,
   deleteProduct,
 } from "../controllers/productController";
 
@@ -24,6 +23,8 @@ const router = Router();
  *               items:
  *                 type: object
  *                 properties:
+ *                   _id:
+ *                     type: string
  *                   name:
  *                     type: string
  */
@@ -32,52 +33,47 @@ router.get("/all", getAllProducts);
 /**
  * @swagger
  * /product:
- *   post:
- *     summary: Add a new product
- *     description: Adds a new product to the system
- */
-router.post("/", addProduct);
-
-/**
- * @swagger
- * /product/{oldName}:
  *   put:
- *     summary: Update a product name
- *     description: Updates an existing product name
- *     parameters:
- *       - in: path
- *         name: oldName
- *         required: true
- *         schema:
- *           type: string
- *         example: milk
+ *     summary: Create or update a product
+ *     description: |
+ *       If _id is provided → updates the product name.  
+ *       If _id is missing → creates a new product.
  *     requestBody:
  *       required: true
  *       content:
  *         application/json:
  *           schema:
  *             type: object
- *             required:
- *               - name
  *             properties:
+ *               _id:
+ *                 type: string
  *               name:
  *                 type: string
- *           example:
- *             name: almond milk
+ *             required:
+ *               - name
+ *           examples:
+ *             create:
+ *               summary: Create product
+ *               value:
+ *                 name: milk
+ *             update:
+ *               summary: Update product
+ *               value:
+ *                 _id: 64f123abc123
+ *                 name: almond milk
  *     responses:
  *       200:
  *         description: Updated list of products
  *       400:
  *         description: Bad request
  */
-router.put("/:oldName", updateProduct);
+router.put("/", upsertProduct);
 
 /**
  * @swagger
  * /product/{name}:
  *   delete:
  *     summary: Delete a product
- *     description: Deletes a product from the system by name
  *     parameters:
  *       - in: path
  *         name: name
@@ -88,7 +84,7 @@ router.put("/:oldName", updateProduct);
  *     responses:
  *       200:
  *         description: Updated list of products
- *       404:
+ *       400:
  *         description: Product not found
  */
 router.delete("/:name", deleteProduct);

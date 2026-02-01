@@ -7,8 +7,13 @@ const options: swaggerJSDoc.Options = {
       title: "Store Simulation API",
       version: "1.0.0",
     },
+    servers: [
+      {
+        url: "http://localhost:3000",
+      },
+    ],
   },
-  apis: ["./src/routes/*.ts"], 
+  apis: ["./src/routes/*.ts"],
 };
 
 export const swaggerSpec = swaggerJSDoc(options);

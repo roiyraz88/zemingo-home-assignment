@@ -1,5 +1,4 @@
 import { Request, Response } from "express";
-import { ProductType } from "../types/product";
 import * as productService from "../services/productService";
 
 export const getAllProducts = async (req: Request, res: Response) => {
@@ -7,27 +6,9 @@ export const getAllProducts = async (req: Request, res: Response) => {
   res.status(200).json(products);
 };
 
-export const addProduct = async (
-  req: Request<{}, {}, ProductType>,
-  res: Response
-) => {
+export const upsertProduct = async (req: Request, res: Response) => {
   try {
-    const products = await productService.addProduct(req.body);
-    res.status(200).json(products);
-  } catch (err: any) {
-    res.status(400).json({ error: err.message });
-  }
-};
-
-export const updateProduct = async (
-  req: Request<{ oldName: string }, {}, { name: string }>,
-  res: Response
-) => {
-  try {
-    const { oldName } = req.params;
-    const { name: newName } = req.body;
-
-    const products = await productService.updateProduct(oldName, newName);
+    const products = await productService.upsertProduct(req.body);
     res.status(200).json(products);
   } catch (err: any) {
     res.status(400).json({ error: err.message });
@@ -40,12 +21,9 @@ export const deleteProduct = async (
 ) => {
   try {
     const { name } = req.params;
-
     const products = await productService.deleteProduct(name);
     res.status(200).json(products);
   } catch (err: any) {
     res.status(400).json({ error: err.message });
   }
 };
-
-
