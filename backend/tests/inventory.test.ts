@@ -18,7 +18,6 @@ afterAll(async () => {
 describe("Inventory API", () => {
   describe("POST /inventory", () => {
     it("should set inventory successfully", async () => {
-      // create product first
       await request(app).put("/product").send({ name: "milk" });
 
       const res = await request(app)
