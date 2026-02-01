@@ -216,6 +216,9 @@ AI assistance was used during development.
 **Tool:** ChatGPT
 
 **Example prompts:**
-- "Design a clean React architecture separating UI from business logic."
 - "Generate Jest + Supertest tests for an Express Product API."
 - "Explain how to dockerize a Node.js backend."
+
+**Tool** Cursor
+**Example prompts:**
+- "You are a Senior Frontend Developer. Help me to style the react app using tailwind css library."
