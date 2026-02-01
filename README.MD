@@ -41,18 +41,16 @@ This project is a store inventory management system built as part of a developme
 
 ---
 
-## 🔧 API Design Notes
+## 🔧 API Design Notes (Simple Version)
 
-During development, the following improvements were applied:
+Some adjustments were made to the API in order to match the functional requirements more accurately:
 
-**Product creation endpoint was changed from:**
-- PUT → POST
-
-...to better follow REST conventions.
-
-**Additional product endpoints were added:**
-- ✏️ Rename product
-- 🗑️ Delete product
+- Since the requirements specify that products can be deleted, a dedicated DELETE endpoint was added for product removal.
+- The same endpoint is used for both creating and updating products:
+  - Create product → PUT `/product` with `{ name }`
+  - Update product → PUT `/product` with `{ _id, name }`
+- The backend decides whether to create or update based on the presence of the `_id` field.
+- Deleting a product also removes it from the inventory automatically to keep the system consistent.
 
 ---
 
@@ -136,18 +134,32 @@ docker run -p 3000:3000 --env-file .env zemingo-backend
 
 | Method | Endpoint | Description |
 | --- | --- | --- |
-| GET | /api/product/all | Get all products |
-| POST | /api/product | Create product |
-| PUT | /api/product/:oldName | Rename product |
-| DELETE | /api/product/:name | Delete product |
+| GET | /product/all | Get all products |
+| PUT | /product | Create or update product |
+| DELETE | /product/:name | Delete product |
+
+**Create product example:**
+```
+{ "name": "milk" }
+```
+
+**Update product example:**
+```
+{ "_id": "64f123abc123", "name": "chocolate" }
+```
 
 ### Inventory API
 
 | Method | Endpoint | Description |
 | --- | --- | --- |
-| GET | /api/inventory | Get inventory |
-| POST | /api/inventory | Set inventory |
-| POST | /api/inventory/reset | Reset inventory |
+| GET | /inventory | Get inventory |
+| POST | /inventory | Set inventory |
+| POST | /inventory/reset | Reset inventory |
+
+**Inventory item format:**
+```
+{ "name": "milk", "quantity": 3 }
+```
 
 ---
 
@@ -202,7 +214,7 @@ Tests implemented using:
 - Separate MongoDB test database
 
 Covered cases:
-- Product creation / update / deletion
+- Product creation, update and deletion
 - Duplicate product handling
 - Inventory validation
 - Inventory reset
@@ -213,13 +225,11 @@ Covered cases:
 
 AI assistance was used during development.
 
-**Tool:** ChatGPT
-
+**Tool: ChatGPT**  
 **Example prompts:**
 - "Generate Jest + Supertest tests for an Express Product API."
-- "Explain how to dockerize a Node.js backend."
+- "Help me refactor my backend to a layered architecture."
 
-**Tool:** Cursor
-
+**Tool: Cursor**  
 **Example prompts:**
-- "You are a Senior Frontend Developer. Help me to style the react app using tailwind css library."
+- "You are a Senior Frontend Developer. Help me style the React app using Tailwind CSS."
